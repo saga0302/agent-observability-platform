@@ -23,3 +23,13 @@ curl -X POST http://localhost:8000/collect \
   -H "Content-Type: application/json" \
   -d '{"question": "...", "tool_calls": [...], "agent_response": "..."}'
 ```
+
+## Status: Day 2 — Kafka Consumer + Event-Sourced Storage
+
+- Collector (`POST /collect`) now only validates and publishes to Kafka — no direct database write
+- `src/kafka_consumer.py` independently consumes `agent-traces` and writes to PostgreSQL
+- Chose this design over an initial dual-write approach (collector writing to both Postgres and Kafka directly) specifically to avoid the dual-write consistency problem — if one write fails, the two stores can silently disagree. Kafka is now the single source of truth every downstream service reads from.
+- Added `anomalies` and `alerts` tables for future anomaly detection and alerting
+- Query API: `GET /traces`, `GET /traces/{trace_id}`, `GET /stats`
+- Synthetic trace generator (`demo/synthetic_traces.py`) for load testing without a live agent
+- Verified: 50 synthetic traces sent → all 50 flowed through Kafka → all 50 landed in PostgreSQL
