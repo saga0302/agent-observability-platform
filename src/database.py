@@ -93,3 +93,26 @@ def get_stats():
             }
     finally:
         conn.close()
+
+
+
+
+def insert_evaluation(trace_id, correctness_score, hallucination_detected,
+                      tool_usage_score, claude_feedback):
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO evaluations
+                    (trace_id, correctness_score, hallucination_detected,
+                     tool_usage_score, claude_feedback)
+                VALUES (%s, %s, %s, %s, %s)
+                ON CONFLICT (trace_id) DO NOTHING
+                """,
+                (trace_id, correctness_score, hallucination_detected,
+                 tool_usage_score, claude_feedback),
+            )
+        conn.commit()
+    finally:
+        conn.close()

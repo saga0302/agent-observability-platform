@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 .env
 .DS_StoreFull plan.md
+My Reference/
+.DS_Store
